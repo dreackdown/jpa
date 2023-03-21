@@ -1,6 +1,7 @@
 package br.com.alura.loja.dao;
 
 import br.com.alura.loja.dto.RelatorioDeVendasDto;
+import br.com.alura.loja.dto.VendasPorDiaDto;
 import br.com.alura.loja.modelo.Pedido;
 
 import javax.persistence.EntityManager;
@@ -36,6 +37,25 @@ public class PedidoDao {
                 + "GROUP BY produto.nome "
                 + "ORDER BY item.quantidade DESC";
         return em.createQuery(jpql, RelatorioDeVendasDto.class)
+                .getResultList();
+    }
+
+    public Pedido buscarPedidoComCliente(Long id) {
+        return em.createQuery("SELECT p FROM Pedido p JOIN FETCH p.cliente WHERE p.id = :id", Pedido.class)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
+
+    public List<VendasPorDiaDto> vendasPorDia() {
+        String jpql = "SELECT new br.com.alura.loja.dto.VendasPorDiaDto("
+                + "produto.nome, "
+                + "sum(pedido.valorTotal), "
+                + "pedido.data) "
+                + "FROM Pedido pedido "
+                + "JOIN pedido.itens itens "
+                + "JOIN itens.produto produto "
+                + "GROUP BY produto.nome, pedido.data";
+        return em.createQuery(jpql, VendasPorDiaDto.class)
                 .getResultList();
     }
 }
